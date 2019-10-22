@@ -4,7 +4,7 @@ module.exports = {
   port: "5431",
   username: "postgres",
   password: "docker",
-  database: "databasegympoint",
+  database: "gympoint",
   define: {
     timestamps: true,
     underscored: true,
