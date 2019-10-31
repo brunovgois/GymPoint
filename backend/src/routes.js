@@ -10,5 +10,6 @@ routes.post('/session', SessionController.store);
 
 routes.use(authMiddleware);
 routes.post('/students', StudentsController.store);
+routes.put('/student/:id', StudentsController.update);
 
 export default routes;
