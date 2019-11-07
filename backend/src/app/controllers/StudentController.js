@@ -42,7 +42,7 @@ class StudentController {
       email: Yup.string().email(),
       age: Yup.number().integer(),
       weight: Yup.number(),
-      height: Yup.number(),
+      height: Yup.number()
     });
 
     if (!(await schema.isValid(req.body))) {
@@ -53,21 +53,19 @@ class StudentController {
 
     const student = await Student.findByPk(req.params.id);
 
-    if(!student) {
-      return res.status(400).json({ error: "Student not found"});
+    if (!student) {
+      return res.status(400).json({ error: "Student not found." });
     }
 
-    if(email && email != student.email) {
-      const studentAlreadyExists = await Student.findOne({ where: { email }});
+    if (email && email != student.email) {
+      const studentAlreadyExists = await Student.findOne({ where: { email } });
 
-      if(studentAlreadyExists) {
-        return res.status(400).json({ error: "Email already exists"})
+      if (studentAlreadyExists) {
+        return res.status(400).json({ error: "Email already exists." });
       }
     }
 
-    const {id, name, age, weight, height} = await student.update(
-      req.body
-    );
+    const { id, name, age, weight, height } = await student.update(req.body);
 
     return res.json({
       id,
@@ -75,10 +73,8 @@ class StudentController {
       email,
       age,
       weight,
-      height,
+      height
     });
-
-
   }
 }
 
