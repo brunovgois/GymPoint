@@ -8,9 +8,9 @@ class StudentController {
       email: Yup.string()
         .email()
         .required(),
-      age: Yup.number().integer(),
-      weight: Yup.number(),
-      height: Yup.number()
+      age: Yup.number().integer().required(),
+      weight: Yup.number().required(),
+      height: Yup.number().required()
     });
 
     if (!(await schema.isValid(req.body))) {
