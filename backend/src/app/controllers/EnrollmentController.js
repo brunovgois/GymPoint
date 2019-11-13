@@ -1,8 +1,11 @@
 import * as Yup from "yup";
-import { addMonths, parseISO } from "date-fns";
+import { addMonths, parseISO, format } from "date-fns";
+import pt from 'date-fns/locale/pt';
 import Enrollment from "../models/Enrollment";
 import Plan from "../models/Plan";
 import Student from "../models/Student";
+
+import Mail from "../../lib/Mail";
 
 class EnrollmentController {
   async store(req, res) {
@@ -30,19 +33,40 @@ class EnrollmentController {
 
     const plan = await Plan.findByPk(planId);
 
-    if(!plan) {
+    if (!plan) {
       return res.status(404).json({ error: "Plan could not be found." });
     }
 
-    //TODO mandar email
+    const studentAlreadyEnrolled = await Enrollment.findOne({
+      where: { student_id: studentId }
+    });
+
+    if (studentAlreadyEnrolled) {
+      return res.status(400).json({ error: "Student alredy enrolled." });
+    }
 
     const enrollment = await Enrollment.create({
       student_id: studentId,
       plan_id: planId,
       start_date: startDate,
       end_date: addMonths(parseISO(startDate), plan.duration),
-      price: plan.getTotalPrice(),
-    })
+      price: plan.getTotalPrice()
+    });
+
+    await Mail.sendMail({
+      to: `${student.name} <${student.email}>`,
+      subject: "Matricula realizada",
+      template: 'enrollment',
+      context: {
+        student: student.name,
+        plan: plan.title,
+        end_date: format(enrollment.end_date, "'dia' dd 'de' MMMM 'de' yyyy", {
+          locale: pt
+        }),
+        value: enrollment.price,
+      }
+
+    });
 
     return res.json(enrollment);
   }
@@ -55,8 +79,10 @@ class EnrollmentController {
 
   async update(req, res) {
     const schema = Yup.object().shape({
-      plan_id: Yup.number().integer().required(),
-      start_date: Yup.date().required(),
+      plan_id: Yup.number()
+        .integer()
+        .required(),
+      start_date: Yup.date().required()
     });
 
     if (!(await schema.isValid(req.body))) {
@@ -69,23 +95,22 @@ class EnrollmentController {
     const enrollment = await Enrollment.findByPk(id);
     const plan = await Plan.findByPk(plan_id);
 
-    if(!enrollment) {
+    if (!enrollment) {
       return res.status(404).json({ error: "Enrollment could not be found." });
     }
 
-    if(!plan) {
+    if (!plan) {
       return res.status(404).json({ error: " Plan could not be found." });
-
     }
 
     let { price, end_date } = enrollment;
 
-    if(enrollment.plan_id !== plan_id) {
+    if (enrollment.plan_id !== plan_id) {
       price = plan.getTotalPrice();
       end_date = addMonths(parseISO(start_date), plan.duration);
     }
 
-    if(start_date !== enrollment.start_date) {
+    if (start_date !== enrollment.start_date) {
       end_date = addMonths(parseISO(start_date), plan.duration);
     }
 
@@ -93,11 +118,14 @@ class EnrollmentController {
       plan_id,
       start_date,
       end_date,
-      price,
+      price
     });
 
     return res.json({
-      plan_id, start_date, end_date, price
+      plan_id,
+      start_date,
+      end_date,
+      price
     });
   }
 
@@ -108,7 +136,7 @@ class EnrollmentController {
 
     if (!enrollment) {
       return res.status(404).json({
-        error: 'Enrollment could not be found.',
+        error: "Enrollment could not be found."
       });
     }
 
