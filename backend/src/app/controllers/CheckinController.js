@@ -36,6 +36,18 @@ class CheckinController {
 
     return res.json(checkin);
   }
+
+  async index(req, res) {
+    const { id } = req.params;
+
+    const checkins = await Checkins.findAll({
+      where: {
+        student_id: id
+      }
+    });
+
+    return res.json(checkins);
+  }
 }
 
 export default new CheckinController();

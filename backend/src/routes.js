@@ -12,8 +12,10 @@ const routes = new Router();
 routes.post('/session', SessionController.store);
 
 routes.post('/students/:id/checkins', CheckinController.store);
+routes.get('/students/:id/checkins', CheckinController.index);
 
 routes.use(authMiddleware);
+
 routes.post('/students', StudentsController.store);
 routes.put('/student/:id', StudentsController.update);
 
