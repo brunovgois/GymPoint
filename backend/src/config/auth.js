@@ -1,4 +1,4 @@
 export default {
-  secret: process.env.APP_SECRET,
+  secret: 'bootcampgympointnode',
   expiresIn: '1d',
 };
